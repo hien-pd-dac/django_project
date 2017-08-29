@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+    Post Detail
+{% endblock %}
+
+{% block content %}
+    <h2>
+        <small>DETAIL POST</small>
+    </h2>
+    <hr>
+    <div class="user-one"
+         data-user="{{ post.author.is_tutor }}"
+         data-admin="{{ post.author.is_superuser }}">
+        <div class="row">
+            <div class="col-md-2 text-center">
+                <a href="{% url 'accounts:profile' pk=post.author.id %}">
+                    <img class="img-post img-circle" src="{{ post.author.picture.url }}" alt="profile_pic">
+                </a>
+                <p>{{ post.author.username }}</p>
+            </div>
+            <div class="col-md-10">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2><a href="{% url 'posts:detail_post' pk=post.id %}">{{ post.title }}</a></h2>
+                    </div>
+                    <div class="col-md-3">
+                        <h3>
+                            {% if request.user.id == post.author.id %}
+                                <a href="{% url 'posts:edit_post' pk=post.id %}"><span
+                                        class="glyphicon glyphicon-edit"></span></a>
+                            {% endif %}
+                            {% if request.user.id == post.author.id or request.user.is_superuser %}
+                                <a href="{% url 'posts:delete_post' pk=post.id %}" style="margin-left: 30px"><span
+                                        class="glyphicon glyphicon-trash"></span></a>
+                            {% endif %}
+                            {% if request.user.is_superuser and not post.is_approved %}
+                                <a href="{% url 'posts:approve_post' pk=post.id %}" style="margin-left: 30px"><span
+                                        class="glyphicon glyphicon-open"></span></a>
+                            {% endif %}
+                        </h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <h5><span class="glyphicon glyphicon-time"></span>
+                        Post by {{ post.author.username }}, {{ post.created_at }}</h5>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-road"></span> District:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.district }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-book"></span> Subject:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.subject }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-book"></span> ClassLevel:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.class_level }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-flash"></span> Times/week:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.times_week }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-usd"></span> Salary/hour:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.salary_hour }}vnd</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5">
+                <h4><span class="glyphicon glyphicon-asterisk"></span> Add Note:</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-11">
+                <h4>{{ post.text }}</h4>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-1">
+                {% if is_liked %}
+                    <h4><a id="like-btn" class="btn btn-default"
+                           data-href="{% url 'posts:like_post' post_id=post.id %}">
+                        <span style="color:blue" id="like-color" class="glyphicon glyphicon-thumbs-up"></span>
+                        <span id="num-liked">{{ post.likes.count }}</span></a>
+                    </h4>
+                {% else %}
+                    <h4><a id="like-btn" class="btn btn-default"
+                           data-href="{% url 'posts:like_post' post_id=post.id %}">
+                        <span style="color: black" id="like-color" class="glyphicon glyphicon-thumbs-up"></span>
+                        <span id="num-liked">{{ post.likes.count }}</span></a>
+                    </h4>
+                {% endif %}
+            </div>
+            <div class="col-md-1">
+                <h4>
+                    <a id="cmt-btn" class="btn btn-default"><span class="glyphicon glyphicon-comment"></span>
+                        <span></span>{{ post.post_comments.count }}</a>
+                </h4>
+            </div>
+        </div>
+        <div class="row" style="margin-left: 10px;">
+            <a href="#" data-toggle="modal" data-target="#myModal">
+                <h4><span class="num-liked2">{{ post.likes.count }}</span> people liked this!</h4>
+            </a>
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h3 class="modal-title"><span class="num-liked2">{{ post.likes.count }}</span> people liked this!</h3>
+                        </div>
+                        <div class="modal-body">
+                            {% for liked_usr in post.get_liked_users %}
+                                <a href="{% url 'accounts:profile' pk=liked_usr.id %}">
+                                    <div id="user{{ liked_usr.id }}" class="row">
+                                        <div class="col-md-2">
+                                            <img src="{{ liked_usr.picture.url }}"
+                                                 class="img-circle" alt="Avatar"
+                                                 style="height:50px; width: 50px;">
+                                        </div>
+                                        <div class="col-md-10">
+                                            <h4>{{ liked_usr.username }}</h4>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            {% endfor %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <hr>
+        {% if not request.user.is_authenticated %}
+            <h3>Please log in to comment !</h3>
+        {% else %}
+            <h4>Leave a Comment:</h4>
+            <form method="post" action="{% url 'posts:comment_post' post.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea name="text" class="form-control" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Submit</button>
+            </form>
+        {% endif %}
+    </div>
+    <div class="comment-list">
+        {% if comments.count <= 0 %}
+            <h3>No comments here!</h3>
+        {% else %}
+            {% for comment in comments %}
+                <div class="user-one user-one-cmt"
+                     data-user="{{ comment.author.is_tutor }}" data-admin="{{ comment.author.is_superuser }}">
+                    <div class="row">
+                        <div class="col-md-1 text-center">
+                            <a href="{% url 'accounts:profile' pk=comment.author.id %}">
+                                <img src="{{ comment.author.picture.url }}" class="img-circle img-cmt" alt="Avatar"></a>
+                        </div>
+                        <div class="col-md-11">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h4>{{ comment.author }}
+                                        <small>{{ comment.created_date }}</small>
+                                    </h4>
+                                    <p>{{ comment.text }}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    {% if request.user == comment.author %}
+                                        <button class="edit_cmt btn btn-default"
+                                                data-href="{% url 'posts:edit_comment' post_id=post.id comment_id=comment.id %}"
+                                                cancel-href="{% url 'posts:detail_post' pk=post.id %}">
+                                            <span class="glyphicon glyphicon-edit">Edit</span>
+                                        </button>
+                                    {% endif %}
+                                    {% if comment.author == request.user or post.author == request.user %}
+                                        <button class="del_cmt btn btn-default"
+                                                del-href="{% url 'posts:delete_comment' post_id=post.id comment_id=comment.id %}">
+                                            <span class="glyphicon glyphicon-trash">Delete</span>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+
+{% block my-script %}
+    <script>
+        $(document).ready(function () {
+            let edit_cmt = $(".edit_cmt");
+
+            $(".edit_cmt").click(function () {
+                let save_url = $(this).attr("data-href");
+                let cancel_url = $(this).attr("cancel-href");
+                let form_str = `<form method='post' action='${save_url}'>
+                                    {% csrf_token %}
+                                    <div class='form-group'>
+                                      <textarea name='text' class='form-control' rows='3' required></textarea>
+                                    </div>
+                                    <button type='submit' class='btn btn-danger'>Save</button>
+                                    <a href='${cancel_url}'><button class='btn btn-primary'>Cancel</button></a>
+                                </form>`;
+                let old_cmt = $(this).parent().prev().find("p").text();
+                $(this).parent().prev().html(form_str);
+                $(this).parent().prev().find("form div textarea").val(old_cmt);
+            });
+
+            $(".del_cmt").click(function () {
+                let del_url = $(this).attr("del-href");
+                let r = confirm("Delete this comment?");
+                if (r) {
+                    window.location.replace(del_url);
+                }
+            });
+
+            $("#like-btn").click(function (e) {
+                e.preventDefault();
+                {% if not request.user.is_authenticated %}
+                    window.location.replace("{% url 'accounts:login' %}");
+                {% endif %}
+                let likeUrl = $(this).attr("data-href");
+                var user_str = `<div id="user{{ request.user.id }}" class="row">
+                                    <div class="col-md-2">
+                                        <img src="{{ request.user.picture.url }}"
+                                             class="img-circle" alt="Avatar"
+                                             style="height:50px; width: 50px;">
+                                    </div>
+                                    <div class="col-md-10">
+                                        <h4>{{ request.user.username }}</h4>
+                                    </div>
+                                </div>`;
+                $.ajax({
+                    url: likeUrl,
+                    method: "GET",
+                    data: {},
+                    success: function (data) {
+                        $("#num-liked").text(data.num_liked);
+                        $(".num-liked2").text(data.num_liked);
+                        if (data.is_liked) {
+                            $("#like-color").css({"color": "blue"});
+                            $(".modal-body").append(user_str);
+
+                        } else {
+                            $("#like-color").css({"color": "black"});
+                            $("#user{{ request.user.id }}").css("display", "none");
+                        }
+                    },
+                    error: function (error) {
+
+                    }
+
+                });
+            });
+
+            $("#cmt-btn").click(function (e) {
+                e.preventDefault();
+                {% if not request.user.is_authenticated %}
+                    window.location.replace("{% url 'accounts:login' %}");
+                {% endif %}
+                $("form div textarea").focus();
+
+            });
+        });
+    </script>
+{% endblock %}

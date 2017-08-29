@@ -1,0 +1,46 @@
+<div class="info-head jumbotron" style="background-color: #C6B6B6">
+    <div id="acc-name" class="row">
+        {% if user.is_tutor %}
+            <h2>Tutor Account</h2>
+        {% else %}
+            <h2>Student Account</h2>
+        {% endif %}
+    </div>
+    <hr style="margin: 0px auto 0px auto">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                <h4><span class="glyphicon glyphicon-triangle-right"></span>
+                     Name: {{ user.first_name }} {{ user.last_name }}
+                </h4>
+            </div>
+            <div class="row">
+                <h4><span class="glyphicon glyphicon-education"></span> School: {{ user.school }}</h4>
+            </div>
+            <div class="row">
+                <h4>&#127874; Date of birth: {{ user.dateofbirth }}</h4>
+            </div>
+            <div class="row">
+                <h4><span class="glyphicon glyphicon-triangle-right"></span> Classs: {{ user.classname }}</h4>
+            </div>
+            <div class="row">
+                <h4><span class="glyphicon glyphicon-envelope"></span> Email: {{ user.email }}</h4>
+            </div>
+            <div class="row">
+                <h4><span class="glyphicon glyphicon-road"></span> District: {{ user.district }}</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="row img text-center">
+                <img style="margin: 10px -40px 20px 10px"
+                    height="230px" width="200px"
+                    class="img-pro"
+                    src=""></div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <h4><span class="glyphicon glyphicon-pencil"></span> Introduce yourself: {{ user.intro_yourself }}</h4>
+    </div>
+
+</div>

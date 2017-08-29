@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+    Edit Profile
+{% endblock %}
+
+{% block left %}
+    <h2 class="text-center">
+        <small>USER</small>
+    </h2>
+    <hr>
+    <div class="text-center">
+        <div class="row"><a href="{% url 'accounts:profile' pk=user.id %}">
+            <img class="img-profile img-circle" src="{{ user.picture.url }}" alt="profile_pic"></a>
+        </div>
+        <div class="row">
+            <h2>{{ user.username }}</h2>
+        </div>
+        <div class="row">
+            {% if user.id == request.user.id %}
+                <a style="margin-right: 10px;" class="btn btn-default"
+                   href="{% url 'accounts:edit_profile' pk=user.id %}">
+                    <span class="glyphicon glyphicon-edit">Profile</span>
+                </a>
+                <a class="btn btn-default" href="{% url 'posts:create_post' pk=user.id %}">
+                    <span class="glyphicon glyphicon-plus">Post</span>
+                </a>
+            {% endif %}
+        </div>
+        {% if user.is_tutor %}
+            <div class="row">
+                {% if request.user != user %}
+                    <div style="margin-top: 15px">Your rate: <span id="your-rated">{{ rating }}</span></div>
+                    <div class="star-ratings">
+                        <div id="s0" class="star-rating" value="0"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=0 %}">
+                            <span class="glyphicon glyphicon-thumbs-down"> </span>
+                        </div>
+                        <div id="s1" class="star-rating star-rating-color" value="1"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=1 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s2" class="star-rating star-rating-color" value="2"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=2 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s3" class="star-rating star-rating-color" value="3"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=3 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s4" class="star-rating star-rating-color" value="4"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=4 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s5" class="star-rating star-rating-color" value="5"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=5 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                    </div>
+                    <div class="text-center">( Be student to vote Tutor !)</div>
+                {% endif %}
+            </div>
+            <div class="row" style="margin-top: 10px">
+                Rating: <span id="rating-avg">{{ user.str_avg_rating }}</span>
+                <span class="glyphicon glyphicon-star-empty" style="color: #F1C707"></span>
+            </div>
+            <div class="row">
+                Votes: <span id="rating-num">{{ user.count_raters }}</span>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    <div class="create-post-space">
+        <h2>Edit Profile:</h2>
+        <form method="POST" class="post-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button type="submit" class="save btn btn-default">Save</button>
+        </form>
+    </div>
+{% endblock %}

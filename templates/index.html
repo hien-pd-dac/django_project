@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Home Page
+{% endblock %}
+
+{% block left %}
+    {% load my_template_tags %}
+    {% show_rating_list 5 %}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-5">
+            <h2>
+                <small>RECENT POSTS</small>
+            </h2>
+        </div>
+        <div class="col-md-3">
+            <br>
+            <canvas width="40px" height="30px" style="background-color: #B3C7CF"></canvas>
+            <label>Color for Tutors</label>
+        </div>
+        <div class="col-md-4">
+            <br>
+            <canvas width="40px" height="30px" style="background-color: #ADEFAA"></canvas>
+            <label>Color for Students</label>
+        </div>
+    </div>
+
+    <hr>
+    {% include 'posts/posts_list.html' %}
+{% endblock %}
+
+{% block my-script %}
+
+{% endblock %}

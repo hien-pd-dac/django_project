@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+    Post Edit
+{% endblock %}
+
+{% block left %}
+    <h2 class="text-center">
+        <small>USER</small>
+    </h2>
+    <hr>
+    <div class="text-center">
+        <div class="row"><a href="{% url 'accounts:profile' pk=user.id %}">
+            <img class="img-profile img-circle" src="{{ user.picture.url }}" alt="profile_pic"></a>
+        </div>
+        <div class="row">
+            <h2>{{ user.username }}</h2>
+        </div>
+        <div class="row">
+            {% if user.id == request.user.id %}
+                <a style="margin-right: 10px;" class="btn btn-default"
+                   href="{% url 'accounts:edit_profile' pk=user.id %}">
+                    <span class="glyphicon glyphicon-edit">Profile</span>
+                </a>
+                <a class="btn btn-default" href="{% url 'posts:create_post' pk=user.id %}">
+                    <span class="glyphicon glyphicon-plus">Post</span>
+                </a>
+            {% endif %}
+        </div>
+        {% if user.is_tutor %}
+            <div class="row">
+                {% if request.user != user %}
+                    <div style="margin-top: 15px">Your rate: <span id="your-rated">{{ rating }}</span></div>
+                    <div class="star-ratings">
+                        <div id="s0" class="star-rating" value="0"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=0 %}">
+                            <span class="glyphicon glyphicon-thumbs-down"> </span>
+                        </div>
+                        <div id="s1" class="star-rating star-rating-color" value="1"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=1 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s2" class="star-rating star-rating-color" value="2"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=2 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s3" class="star-rating star-rating-color" value="3"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=3 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s4" class="star-rating star-rating-color" value="4"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=4 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s5" class="star-rating star-rating-color" value="5"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating_=5 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                    </div>
+                    <div class="text-center">( Be student to vote Tutor !)</div>
+                {% endif %}
+            </div>
+            <div class="row" style="margin-top: 10px">
+                Rating: <span id="rating-avg">{{ user.str_avg_rating }}</span>
+            </div>
+            <div class="row">
+                Votes: <span id="rating-num">{{ user.count_raters }}</span>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h2 class="text-center"><small>YOUR POST</small></h2>
+    <hr>
+    <div class="user-one"
+         data-user="{{ post.author.is_tutor }}"
+         data-admin="{{ post.author.is_superuser }}">
+        <div class="row">
+            <div class="col-md-2 text-center">
+                <a href="{% url 'accounts:profile' pk=post.author.id %}">
+                    <img class="img-post img-circle" src="{{ post.author.picture.url }}" alt="profile_pic">
+                </a>
+                <p>{{ post.author.username }}</p>
+            </div>
+            <div class="col-md-10">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2><a href="{% url 'posts:detail_post' pk=post.id %}">{{ post.title }}</a></h2>
+                    </div>
+                    <div class="col-md-3">
+                        <h3>
+                            {% if request.user.id == post.author.id %}
+                                <a href="{% url 'posts:edit_post' pk=post.id %}"><span
+                                        class="glyphicon glyphicon-edit"></span></a>
+                            {% endif %}
+                            {% if request.user.id == post.author.id or request.user.is_superuser %}
+                                <a href="{% url 'posts:delete_post' pk=post.id %}" style="margin-left: 30px"><span
+                                        class="glyphicon glyphicon-trash"></span></a>
+                            {% endif %}
+                            {% if request.user.is_superuser and not post.is_approved %}
+                                <a href="{% url 'posts:approve_post' pk=post.id %}" style="margin-left: 30px"><span
+                                        class="glyphicon glyphicon-open"></span></a>
+                            {% endif %}
+                        </h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <h5><span class="glyphicon glyphicon-time"></span>
+                        Post by {{ post.author.username }}, {{ post.created_at }}</h5>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-road"></span> District:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.district }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-book"></span> Subject:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.subject }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-book"></span> ClassLevel:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.class_level }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-flash"></span> Times/week:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.times_week }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-usd"></span> Salary/hour:</h4>
+                    </div>
+                    <div class="col-md-7">
+                        <h4>{{ post.salary_hour }}vnd</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5">
+                <h4><span class="glyphicon glyphicon-asterisk"></span> Add Note:</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-11">
+                <h4>{{ post.text }}</h4>
+            </div>
+        </div>
+        <hr>
+    </div>
+    <div class="edit-post">
+        <h2>Edit post:</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <input type="submit" value="Save" class="btn btn-primary">
+        </form>
+
+    </div>
+{% endblock %}

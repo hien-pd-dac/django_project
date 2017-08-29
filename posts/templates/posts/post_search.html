@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+    Post Search
+{% endblock %}
+
+{% block left %}
+    {% load my_template_tags %}
+    {% show_rating_list 5 %}
+{% endblock %}
+
+{% block content %}
+    <h2>
+        <div class="row">
+            <div class="col-md-4">
+                <small>RESULTS:</small>
+            </div>
+            <div class="col-md-3">
+                <small>{{ matches }} matches!</small>
+            </div>
+            <div class="col-md-5">
+                <small>{{ recommend }} recommend!</small>
+            </div>
+        </div>
+    </h2>
+    <hr>
+    {% include 'posts/posts_list.html' %}
+{% endblock %}
+
+{% block right %}
+    <h2>
+        <small>SEARCH</small>
+    </h2>
+    <hr>
+    <form method="GET" action="{% url 'posts:search_post' %}">
+        {% bootstrap_form form %}
+        <input type="submit" value="Search" class="btn btn-primary">
+    </form>
+    <hr>
+    <br>
+
+    {% show_district_user_list %}
+{% endblock %}
+
+{% block my-script %}
+    <script>
+        $(document).ready(function () {
+            {#            rating star#}
+            $(".star-rating").hover(function () {
+                $(this).css("color", "yellow");
+                $(this).prevAll(".star-rating-color").css("color", "yellow");
+            }, function () {
+                $(this).css("color", "black");
+                $(".star-rating").css("color", "black");
+            });
+
+            $(".star-rating").click(function () {
+                {% if not request.user.is_authenticated %}
+                    window.location.replace("{% url 'accounts:login' %}");
+                {% endif %}
+                let voteUrl = $(this).attr("data-href");
+                let a = $(this);
+                $.ajax({
+                    url: voteUrl,
+                    method: "GET",
+                    data: {},
+                    success: function (data) {
+                        $("#rating-num").text(data.raters);
+                        $("#your-rated").text(data.your_rated);
+                        $("#rating-avg").text(data.rating_avg);
+                    },
+                    error: function (error) {
+
+                    }
+                })
+            });
+        });
+    </script>
+{% endblock %}

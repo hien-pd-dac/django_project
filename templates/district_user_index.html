@@ -1,0 +1,16 @@
+<h2>
+    <small>USERS LIST</small>
+</h2>
+<hr>
+<div class="list-group">
+    {% for district in district_list %}
+        <a href="{% url 'district_user' district_id=district.id %}"
+           id="{{ district.id }}"
+           class="list-group-item">
+            <div class="row">
+                <div class="col-md-10">{{ district.name }}</div>
+                <div class="col-md-2">{{ district.district_users.count }}</div>
+            </div>
+        </a>
+    {% endfor %}
+</div>

@@ -1,0 +1,238 @@
+{% load staticfiles %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>District users list</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+          crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/master.css' %}">
+    <script src="http://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+            crossorigin="anonymous"></script>
+
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+            {% if request.user.is_authenticated %}
+                <li><a href="{% url 'accounts:profile' pk=request.user.id %}">
+                    <img class="img-profile-header img-circle"
+                         src="{{ request.user.picture.url }}" alt="profile_pic">{{ request.user.first_name }}
+                </a>
+                </li>
+                <li><a href="" data-title="<strong>notifications</strong>" data-toggle="popover"
+                       data-placement="bottom">
+                        <span class="glyphicon glyphicon-globe">
+                            {% if request.user.get_num_unread_noties != 0 %}
+                                <span class="num-noties">{{ request.user.get_num_unread_noties }}</span>
+                            {% endif %}
+                        </span> Notify
+                </a>
+                </li>
+                {% if request.user.is_superuser %}
+                    <li><a href="{% url 'posts:approve' %}"><span class="glyphicon glyphicon-open"></span>
+                        <label id="num-approve"></label> Approve
+                    </a>
+                    </li>
+                {% endif %}
+                <li><a href="{% url 'accounts:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
+                </li>
+            {% else %}
+                <li><a href="{% url 'accounts:login' %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                <li><a href="{% url 'accounts:signup' %}"><span class="glyphicon glyphicon-user"></span> Signup</a></li>
+            {% endif %}
+
+        </ul>
+    </div>
+</nav>
+<div class="container-fluid" style="margin-top: 50px">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="row">
+                <h2>
+                    <small style="margin-left: 30px;">{{ num_users }} users in {{ district.name }}</small>
+                </h2>
+                <hr>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="page-number">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                {% if user_list.has_previous %}
+                                    <li>
+                                        <a href="?page={{ user_list.previous_page_number }}&{{ query }}"
+                                           aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <a href="" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if paginator.num_pages >= 1 %}
+                                    {% for page_num in paginator.page_range %}
+                                        <li class="{{ page_num }}"><a
+                                                href="?page={{ page_num }}&{{ query }}">{{ page_num }}</a>
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+
+                                {% if user_list.has_next %}
+                                    <li>
+                                        <a href="?page={{ user_list.next_page_number }}&{{ query }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <div id="filter-bar" class="col-md-4">
+                    <span class="inline glyphicon glyphicon-filter"></span> <label>Filter by:</label>
+                    <label class="radio-inline" style="margin-left: 30px">
+                        <input id="ra1" class="raido-filter" value="all" type="radio" name="filter_radio">All
+                    </label>
+                    <label class="radio-inline">
+                        <input id="ra2" class=radio-filter" value="student" type="radio" name="filter_radio">Student
+                    </label>
+                    <label class="radio-inline">
+                        <input id="ra3" class=radio-filter" value="tutor" type="radio" name="filter_radio">Tutor
+                    </label>
+                </div>
+            </div>
+            <hr>
+            {% block content %}
+                {% for user in user_list %}
+                    <a href="{% url 'accounts:profile' pk=user.id %}">
+                        <div class="user-one col-sm-4 col-md-3"
+                             data-user="{{ user.is_tutor }}"
+                             data-admin="{{ user.is_superuser }}">
+                            <div class="thumbnail">
+                                <img src="{{ user.picture.url }}"
+                                     alt="profile_pic" class="img-circle" style="height: 100px; width: 100px;">
+                                <div class="caption text-center">
+                                    <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+                                    <h5>{{ user.school }}</h5>
+                                    <h5>{{ user.classname }}</h5>
+                                    <h5>{{ user.dateofbirth }}</h5>
+                                    <h5>Posted: {{ user.auth_posts.count }}</h5>
+                                    {% if user.is_tutor %}
+                                        <h5>Rating: {{ user.str_avg_rating }}
+                                            <span class="glyphicon glyphicon-star-empty" style="color: #F1C707"></span>
+                                        </h5>
+                                        <h5>Votes: {{ user.count_raters }}</h5>
+                                    {% else %}
+                                        <h5><br></h5>
+                                        <h5><br></h5>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% endblock %}
+        </div>
+        <div class="col-md-3">
+            {% block right %}
+                {% load my_template_tags %}
+                {% get_search_form %}
+                {% show_district_user_list %}
+            {% endblock %}
+        </div>
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+        const TUTOR_COLOR = "#B3C7CF";
+        const STUDENT_COLOR = "#ADEFAA";
+        const ADMIN_COLOR = "#F1C18E";
+
+        $(".user-one").css("background-color", function () {
+            let data_color_tutor = $(this).attr("data-user");
+            let data_color_admin = $(this).attr("data-admin");
+            if (data_color_tutor === "True") {
+                return TUTOR_COLOR;
+            }
+            if (data_color_admin === "True") {
+                return ADMIN_COLOR;
+            }
+            return STUDENT_COLOR;
+        });
+
+        $("hr").css("margin", "5px auto 5px auto");
+
+        $(".{{ user_list.number }}").addClass("active");
+        $("input[type=radio][name=filter_radio]").change(function () {
+            var filter = $(this).attr('value');
+            old_url = $(location).attr('href');
+            first_index = old_url.indexOf("filter");
+            if (first_index === -1) {          // if url had not 'filter'
+                if (old_url.indexOf('?') === -1) {   // if url had not '?'
+                    new_url = old_url + `?filter=${filter}`;
+                } else {
+                    new_url = old_url + `&filter=${filter}`;
+                }
+                window.location.replace(new_url);
+            } else {
+                sub_str = old_url.substring(first_index);
+                if (filter === "student") {
+                    new_url = old_url.replace(sub_str, "filter=student");
+                }
+                if (filter === "tutor") {
+                    new_url = old_url.replace(sub_str, "filter=tutor");
+                }
+                if (filter === "all") {
+                    new_url = old_url.replace(sub_str, "filter=all");
+                }
+                window.location.replace(new_url);
+            }
+        });
+
+        {% if filter == 'all' %}
+            $("#ra1").attr("checked", "checked");
+        {% elif filter == 'student' %}
+            $("#ra2").attr("checked", "checked");
+        {% elif filter == 'tutor' %}
+            $("#ra3").attr("checked", "checked");
+        {% endif %}
+        {#            caculate the number of post not been approved#}
+        let approve_tag = $("#num-approve");
+        $.ajax({
+            url: "{% url 'posts:caculate_approve' %}",
+            method: "GET",
+            success: function (data) {
+                approve_tag.text(data.num_approve);
+                approve_tag.css("color", "red");
+            },
+            error: function (error) {
+            }
+        });
+
+        $("#{{ district.id }}").addClass("active");
+        $(".list-group-item").hover(function () {
+            $(this).addClass("active");
+        }, function () {
+            $(this).removeClass("active");
+            $("#{{ district.id }}").addClass("active");
+        });
+
+    });
+</script>
+
+
+</body>

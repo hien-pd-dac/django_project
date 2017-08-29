@@ -1,0 +1,283 @@
+{% load staticfiles %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {% block title %}
+
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+          crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/master.css' %}">
+    <script src="http://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+            {% if request.user.is_authenticated %}
+                <li><a href="{% url 'accounts:profile' pk=request.user.id %}">
+                    <img class="img-profile-header img-circle"
+                         src="{{ request.user.picture.url }}" alt="profile_pic">{{ request.user.first_name }}
+                </a>
+                </li>
+                <li><a href="" data-title="<strong>notifications</strong>" data-toggle="popover"
+                       data-placement="bottom">
+                        <span class="glyphicon glyphicon-globe">
+                            {% if request.user.get_num_unread_noties != 0 %}
+                                <span class="num-noties">{{ request.user.get_num_unread_noties }}</span>
+                            {% endif %}
+                        </span> Notifications
+                </a>
+                </li>
+                {% if request.user.is_superuser %}
+                    <li><a href="{% url 'posts:approve' %}">
+                        <span class="glyphicon glyphicon-open">
+                            <span id="num-approve" class="num-approve"></span>
+                        </span>Approve
+                    </a>
+                    </li>
+                {% endif %}
+                <li><a href="{% url 'accounts:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
+                </li>
+            {% else %}
+                <li><a href="{% url 'accounts:login' %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                <li><a href="{% url 'accounts:signup' %}"><span class="glyphicon glyphicon-user"></span> Signup</a></li>
+            {% endif %}
+
+        </ul>
+    </div>
+</nav>
+<div id="container-fluid" class="container-fluid" style="margin-top: 50px">
+    <div class="row">
+        <div class="col-md-2">
+            {% block left %}
+            {% endblock %}
+        </div>
+
+        <div class="col-md-7">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+        <div class="col-md-3">
+            {% block right %}
+                {% load my_template_tags %}
+                {% get_search_form %}
+                {% show_district_user_list %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+
+<!-- load popover html -->
+{% if request.user.is_authenticated %}
+    <div id="popover-content" style="display: none;">
+
+        {% load my_template_tags %}
+        {% get_user_noties request.user as noti_list %}
+        <div class="list-group">
+            {% for noti in noti_list %}
+                {% if noti.rating == -1 %}
+                    <a class="list-group-item"
+                       href="{% url 'posts:detail_post' pk=noti.noti_post.id %}">
+                        <div class="row color-noti" data-seen="{{ noti.seen }}">
+                            <div class="col-md-3">
+                                <img src="{{ noti.from_user.picture.url }}"
+                                     class="img-circle" alt="Avatar"
+                                     style="height:30px; width: 30px;">
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    {{ noti.get_noti_str }}
+                                </div>
+                                <div class="row">
+                                    {% if noti.noti_type == '1' %}
+                                        <span style="color: cornflowerblue"
+                                              class="glyphicon glyphicon-thumbs-up"></span>
+                                    {% else %}
+                                        <span class="glyphicon glyphicon-comment"></span>
+                                    {% endif %}
+                                    {{ noti.noti_date }}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                {% else %}
+                    <a class="list-group-item"
+                       href="{% url 'accounts:profile' pk=noti.to_user.id %}">
+                        <div class="row color-noti" data-seen="{{ noti.seen }}" >
+                            <div class="col-md-3">
+                                <img src="{{ noti.from_user.picture.url }}"
+                                     class="img-circle" alt="Avatar"
+                                     style="height:30px; width: 30px;">
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    {{ noti.get_noti_str }}
+                                </div>
+                                <div class="row">
+                                    <span style="color: #F1C707" class="glyphicon glyphicon-star-empty"> </span>
+                                    {{ noti.noti_date }}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+    </div>
+{% endif %}
+
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="popover"]').popover({
+            container: 'body',
+            html: true,
+            content: function () {
+                return $('#popover-content').html();
+            }
+        });
+        $('[data-toggle="popover"]').click(function (e) {
+            e.preventDefault();
+            $(".num-noties").remove();
+            $.ajax({
+                url: "{% url 'accounts:seen_noties'%}",
+                method: "GET",
+                success: function (data) {
+                },
+                error: function (error) {
+                }
+            });
+        });
+
+
+        const TUTOR_COLOR = "#B3C7CF";
+        const STUDENT_COLOR = "#ADEFAA";
+        const ADMIN_COLOR = "#F1C18E";
+
+        $(".user-one").css("background-color", function () {
+            let data_color_tutor = $(this).attr("data-user");
+            let data_color_admin = $(this).attr("data-admin");
+            if (data_color_tutor === "True") {
+                return TUTOR_COLOR;
+            }
+            if (data_color_admin === "True") {
+                return ADMIN_COLOR;
+            }
+            return STUDENT_COLOR;
+        });
+
+        $("hr").css("margin", "5px auto 5px auto");
+
+        {% if user.is_tutor %}
+            $(".img-pro").attr("src", "/media/other_pic/tutor.jpg");
+        {% elif user.is_superuser %}
+            $(".img-pro").attr("src", "/media/other_pic/admin.png");
+            $("#acc-name").html("<h2>Admin Account</h2>");
+        {% else %}
+            $(".img-pro").attr("src", "/media/other_pic/student.jpg");
+        {% endif %}
+
+        {#            caculate the number of post not been approved#}
+        let approve_tag = $("#num-approve");
+        $.ajax({
+            url: "{% url 'posts:caculate_approve' %}",
+            method: "GET",
+            success: function (data) {
+                approve_tag.text(data.num_approve);
+{#                approve_tag.css("color", "red");#}
+            },
+            error: function (error) {
+            }
+        });
+        {#            click like button#}
+        $(".like-btn").click(function (e) {
+            {% if not request.user.is_authenticated %}
+                window.location.replace("{% url 'accounts:login' %}");
+            {% endif %}
+            e.preventDefault();
+            var likeUrl = $(this).attr("data-href");
+            var a = $(this);
+            $.ajax({
+                url: likeUrl,
+                method: "GET",
+                data: {},
+                success: function (data) {
+                    a.find("span.num-liked").text(data.num_liked);
+                    if (data.is_liked) {
+                        a.find("span.like-color").css({"color": "blue"});
+                    } else {
+                        a.find("span.like-color").css({"color": "black"});
+                    }
+                },
+                error: function (error) {
+                }
+            });
+        });
+        $(".{{ post_list.number }}").addClass("active");
+
+        $("input[type=radio][name=filter_radio]").change(function () {
+            var filter = $(this).attr('value');
+            old_url = $(location).attr('href');
+            first_index = old_url.indexOf("filter");
+            if (first_index === -1) {          // if url had not 'filter'
+                if (old_url.indexOf('?') === -1) {   // if url had not '?'
+                    new_url = old_url + `?filter=${filter}`;
+                } else {
+                    new_url = old_url + `&filter=${filter}`;
+                }
+                window.location.replace(new_url);
+            } else {
+                sub_str = old_url.substring(first_index);
+                if (filter === "student") {
+                    new_url = old_url.replace(sub_str, "filter=student");
+                }
+                if (filter === "tutor") {
+                    new_url = old_url.replace(sub_str, "filter=tutor");
+                }
+                if (filter === "all") {
+                    new_url = old_url.replace(sub_str, "filter=all");
+                }
+                window.location.replace(new_url);
+            }
+        });
+
+        {% if filter_check == 'all' %}
+            $("#ra1").attr("checked", "checked");
+        {% elif filter_check == 'student' %}
+            $("#ra2").attr("checked", "checked");
+        {% elif filter_check == 'tutor' %}
+            $("#ra3").attr("checked", "checked");
+        {% endif %}
+
+        $(".list-group-item").hover(function () {
+            $(this).addClass("active");
+        }, function () {
+            $(this).removeClass("active");
+        });
+        $('[data-toggle="popover"]').popover();
+
+
+    });
+</script>
+{% block my-script %}
+
+{% endblock %}
+</body>
+</html>

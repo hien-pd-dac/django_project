@@ -1,0 +1,21 @@
+<h2><small>TOP RATING TUTOR</small></h2>
+<hr>
+{% for rating_user in rating_user_list %}
+    <div class="text-center">
+        <div class="row">
+            <h4>{{ rating_user.username }}</h4>
+        </div>
+        <div class="row"><a href="{% url 'accounts:profile' pk=rating_user.id %}">
+            <img class="img-profile img-circle" src="{{ rating_user.picture.url }}" alt="profile_pic"></a>
+        </div>
+
+        <div class="row" style="margin-top: 15px;">
+            Rating: <span class="rating-avg">{{ rating_user.str_avg_rating }}</span>
+            <span class="glyphicon glyphicon-star-empty" style="color: #F1C707"></span>
+        </div>
+        <div class="row">
+            Votes: <span class="rating-num">{{ rating_user.count_raters }}</span>
+        </div>
+        <hr>
+    </div>
+{% endfor %}

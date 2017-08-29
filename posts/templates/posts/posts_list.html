@@ -1,0 +1,222 @@
+{% if not post_list %}
+    <h2>NO POSTS HERE !</h2>
+{% else %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="page-number">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm">
+                        {% if post_list.has_previous %}
+                            <li>
+                                <a href="?page={{ post_list.previous_page_number }}&{{ query }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li>
+                                <a href="" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if paginator.num_pages >= 1 %}
+                            {% for page_num in paginator.page_range %}
+                                <li class="{{ page_num }}"><a href="?page={{ page_num }}&{{ query }}">{{ page_num }}</a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if post_list.has_next %}
+                            <li>
+                                <a href="?page={{ post_list.next_page_number }}&{{ query }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <div id="filter-bar" class="col-md-6">
+            <span class="inline glyphicon glyphicon-filter"></span> <label>Filter by:</label>
+            <label class="radio-inline" style="margin-left: 30px">
+                <input id="ra1" class="raido-filter" value="all" type="radio" name="filter_radio">All
+            </label>
+            <label class="radio-inline">
+                <input id="ra2" class=radio-filter" value="student" type="radio" name="filter_radio">Student
+            </label>
+            <label class="radio-inline">
+                <input id="ra3" class=radio-filter" value="tutor" type="radio" name="filter_radio">Tutor
+            </label>
+        </div>
+    </div>
+
+    <div class="posts-space">
+        {% for post in post_list %}
+            <div class="user-one"
+                 data-user="{{ post.author.is_tutor }}"
+                 data-admin="{{ post.author.is_superuser }}">
+                <div class="row">
+                    <div class="col-md-2 text-center">
+                        <a href="{% url 'accounts:profile' pk=post.author.id %}">
+                            <img class="img-post img-circle" src="{{ post.author.picture.url }}" alt="profile_pic">
+                        </a>
+                        <p>{{ post.author.username }}</p>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <h2><a href="{% url 'posts:detail_post' pk=post.id %}">{{ post.title }}</a></h2>
+                            </div>
+                            <div class="col-md-3">
+                                <h3>
+                                    {% if request.user.id == post.author.id %}
+                                        <a href="{% url 'posts:edit_post' pk=post.id %}"><span
+                                                class="glyphicon glyphicon-edit"></span></a>
+                                    {% endif %}
+                                    {% if request.user.id == post.author.id or request.user.is_superuser %}
+                                        <a href="{% url 'posts:delete_post' pk=post.id %}"
+                                           style="margin-left: 30px"><span
+                                                class="glyphicon glyphicon-trash"></span></a>
+                                    {% endif %}
+                                    {% if request.user.is_superuser and not post.is_approved %}
+                                        <a href="{% url 'posts:approve_post' pk=post.id %}"
+                                           style="margin-left: 30px"><span
+                                                class="glyphicon glyphicon-open"></span></a>
+                                    {% endif %}
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <h5><span class="glyphicon glyphicon-time"></span>
+                                Post by {{ post.author.username }}, {{ post.created_at }}</h5>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <h4><span class="glyphicon glyphicon-road"></span> District:</h4>
+                            </div>
+                            <div class="col-md-7">
+                                <h4>{{ post.district }}</h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <h4><span class="glyphicon glyphicon-book"></span> Subject:</h4>
+                            </div>
+                            <div class="col-md-7">
+                                <h4>{{ post.subject }}</h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <h4><span class="glyphicon glyphicon-book"></span> ClassLevel:</h4>
+                            </div>
+                            <div class="col-md-7">
+                                <h4>{{ post.class_level }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <h4><span class="glyphicon glyphicon-flash"></span> Times/week:</h4>
+                            </div>
+                            <div class="col-md-7">
+                                <h4>{{ post.times_week }}</h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <h4><span class="glyphicon glyphicon-usd"></span> Salary/hour:</h4>
+                            </div>
+                            <div class="col-md-7">
+                                <h4>{{ post.salary_hour }}vnd</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <h4><span class="glyphicon glyphicon-asterisk"></span> Add Note:</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-11">
+                        <h4>{{ post.text }}</h4>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-1">
+                        {% load my_template_tags %}
+                        {% if like_dict|get_item:post.id %}
+                            <h4><a class="like-btn btn btn-default"
+                                   data-href="{% url 'posts:like_post' post_id=post.id %}">
+                                <span style="color:blue" class="like-color glyphicon glyphicon-thumbs-up"></span>
+                                <span class="num-liked">{{ post.likes.count }}</span></a>
+                            </h4>
+                        {% else %}
+                            <h4><a class="like-btn btn btn-default"
+                                   data-href="{% url 'posts:like_post' post_id=post.id %}">
+                                <span style="color: black" class="like-color glyphicon glyphicon-thumbs-up"></span>
+                                <span class="num-liked">{{ post.likes.count }}</span></a>
+                            </h4>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-1">
+                        <h4>
+                            <a class="cmt-btn btn btn-default"
+                               href="{% url 'posts:detail_post' pk=post.id %}"><span
+                                    class="glyphicon glyphicon-comment"></span>
+                                <span></span>{{ post.post_comments.count }}</a>
+                        </h4>
+                    </div>
+                </div>
+                <hr>
+            </div>
+        {% endfor %}
+
+        <div class="page-number">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if post_list.has_previous %}
+                        <li>
+                            <a href="?page={{ post_list.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if paginator.num_pages >= 1 %}
+                        {% for page_num in paginator.page_range %}
+                            <li class="{{ page_num }}"><a href="?page={{ page_num }}&{{ query }}">{{ page_num }}</a>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if post_list.has_next %}
+                        <li>
+                            <a href="?page={{ post_list.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+        </div>
+    </div>
+{% endif %}

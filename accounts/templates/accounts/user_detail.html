@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Profile Page
+{% endblock %}
+
+{% block left %}
+    <h2 class="text-center">
+        <small>USER</small>
+    </h2>
+    <hr>
+    <div class="text-center">
+        <div class="row"><a href="{% url 'accounts:profile' pk=user.id %}">
+            <img class="img-profile img-circle" src="{{ user.picture.url }}" alt="profile_pic"></a>
+        </div>
+        <div class="row">
+            <h2>{{ user.username }}</h2>
+        </div>
+        <div class="row">
+            {% if user.id == request.user.id %}
+                <a style="margin-right: 10px;" class="btn btn-default"
+                   href="{% url 'accounts:edit_profile' pk=user.id %}">
+                    <span class="glyphicon glyphicon-edit">Profile</span>
+                </a>
+                <a class="btn btn-default" href="{% url 'posts:create_post' pk=user.id %}">
+                    <span class="glyphicon glyphicon-plus">Post</span>
+                </a>
+            {% endif %}
+        </div>
+        {% if user.is_tutor %}
+            <div class="row">
+                {% if request.user != user %}
+                    <div style="margin-top: 15px">Your rate: <span id="your-rated">{{ rating }}</span></div>
+                    <div class="star-ratings">
+                        <div id="s0" class="star-rating" value="0"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating=0 %}">
+                            <span class="glyphicon glyphicon-thumbs-down"> </span>
+                        </div>
+                        <div id="s1" class="star-rating star-rating-color" value="1"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating=1 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s2" class="star-rating star-rating-color" value="2"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating=2 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s3" class="star-rating star-rating-color" value="3"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating=3 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s4" class="star-rating star-rating-color" value="4"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating=4 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                        <div id="s5" class="star-rating star-rating-color" value="5"
+                             data-href="{% url 'accounts:vote_user' user_id=user.id rating=5 %}">
+                            <span class="glyphicon glyphicon-star-empty"> </span>
+                        </div>
+                    </div>
+                    <div class="text-center">( Be student to vote Tutor !)</div>
+                {% endif %}
+            </div>
+            <div class="row" style="margin-top: 10px">
+                Rating: <span id="rating-avg">{{ user.str_avg_rating }}</span>
+                <span class="glyphicon glyphicon-star-empty" style="color: #F1C707"></span>
+            </div>
+            <div class="row">
+                Votes: <span id="rating-num">{{ user.count_raters }}</span>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h2>
+        <small>PROFILE</small>
+    </h2>
+    <hr>
+    {% include 'accounts/userpage_header.html' %}
+    {% include 'posts/posts_list.html' %}
+{% endblock %}
+
+{% block my-script %}
+    <script>
+        $(document).ready(function () {
+            {#            rating star#}
+            const STAR_COLOR = "#F1C707";
+            $("#s0").hover(function () {
+                {% if user.is_tutor and not request.user.is_tutor %}
+                    $(this).css("color", STAR_COLOR);
+                {% endif %}
+            }, function () {
+                {% if user.is_tutor and not request.user.is_tutor %}
+                    $(this).css("color", "black");
+                {% endif %}
+            });
+            $(".star-rating-color").hover(function () {
+                {% if user.is_tutor and not request.user.is_tutor %}
+                    $(this).css("color", STAR_COLOR);
+                    $(this).prevAll(".star-rating-color").css("color", STAR_COLOR);
+                {% endif %}
+            }, function () {
+                {% if user.is_tutor and not request.user.is_tutor %}
+                    $(this).css("color", "black");
+                    $(".star-rating").css("color", "black");
+                {% endif %}
+            });
+
+            $(".star-rating").click(function () {
+                {% if not request.user.is_authenticated %}
+                    window.location.replace("{% url 'accounts:login' %}");
+                {% endif %}
+                {% if user.is_tutor and not request.user.is_tutor %}
+                    let voteUrl = $(this).attr("data-href");
+                    let a = $(this);
+                    $.ajax({
+                        url: voteUrl,
+                        method: "GET",
+                        data: {},
+                        success: function (data) {
+                            $("#rating-num").text(data.raters);
+                            $("#your-rated").text(data.your_rated);
+                            $("#rating-avg").text(data.rating_avg);
+                        },
+                        error: function (error) {
+                        }
+                    });
+                {% endif %}
+
+            });
+            $("#filter-bar").html("");
+        });
+    </script>
+{% endblock %}

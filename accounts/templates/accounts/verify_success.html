@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Success Verify
+{% endblock %}
+
+{% block left %}
+{% endblock %}
+
+{% block content %}
+    <div class="jumbotron">
+        <h2>Email verify successfully !</h2>
+        <h3>Now, account {{ request.user.username }} is available !</h3>
+        <br>
+        <hr>
+        <a href="{% url 'index' %}"><h4>Go to Home Page</h4></a>
+    </div>
+{% endblock %}
+
+{% block right %}
+{% endblock %}
